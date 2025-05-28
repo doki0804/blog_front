@@ -2,19 +2,31 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppStore } from '@/stores/useAppStore'
-import TabManager from '@/components/TapManager'
+import { fetchUser } from '@/lib/user'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import TabManager from '@/components/AdminTabManager'
 
-export default function AdminTabPage() {
-  const user = useAppStore((state) => state.user)
+export default function AdminTabPage() {  
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+    retry: false,
+    staleTime: 1000 * 60,
+  });
   const router = useRouter()
 
   useEffect(() => {
     if (user && !user.is_admin) {
-      alert('접근 권한이 없습니다.') // ✅ 추가됨: 관리자 외 접근 차단
-      router.push('/')
+      alert('관리자만 접근할 수 있습니다.') // ✅ 추가됨
+      router.replace('/') // ✅ 홈으로 강제 이동
     }
   }, [user])
 
-  return user?.is_admin ? <TabManager /> : null // ✅ 추가됨: 조건부 렌더링
+  if (!user || !user.is_admin) return null
+
+  return <TabManager />
 }

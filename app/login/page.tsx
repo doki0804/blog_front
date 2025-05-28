@@ -3,19 +3,26 @@
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import axios from '@/lib/axios'
-import { useAppStore } from '@/stores/useAppStore'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function LoginPage() {
   const { register, handleSubmit } = useForm()
   const router = useRouter()
-  const setToken = useAppStore(state => state.setToken)
-  const refreshUser = useAppStore(state => state.refreshUser)
+  const queryClient = useQueryClient()
 
   const onSubmit = async (data: any) => {
-    const res = await axios.post('/auth/login', data)
-    setToken(res.data.access_token)
-    await refreshUser()
-    router.push('/')
+    try {
+      // JWT 발급 및 저장 (localStorage)
+      const res = await axios.post('/auth/login', data)
+      localStorage.setItem('token', res.data.access_token)
+
+      // user 쿼리 refetch로 상태 최신화 (react-query)
+      await queryClient.invalidateQueries({ queryKey: ['user'] })
+
+      router.push('/')
+    } catch (e: any) {
+      alert('로그인에 실패했습니다.')
+    }
   }
 
   return (

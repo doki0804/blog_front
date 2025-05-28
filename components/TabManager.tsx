@@ -1,14 +1,9 @@
-'use client'
+/* 'use client'
 
 import { useEffect, useState } from 'react'
 import axios from '@/lib/axios'
-import { useAppStore } from '@/stores/useAppStore'
-
-type Tab = {
-  id: number
-  name: string
-  is_hidden: boolean
-}
+import { useAppStore } from '@/stores/useUIStore'
+import { Tab } from '@/types/tab'
 
 export default function TabManager() {
   const { tabs, refreshTabs } = useAppStore()
@@ -79,4 +74,4 @@ export default function TabManager() {
       </ul>
     </div>
   )
-}
+} */

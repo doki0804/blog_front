@@ -1,14 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useAppStore } from '@/stores/useAppStore'
+import { useQuery } from '@tanstack/react-query'
+import { fetchUser } from '@/lib/user'
 
-export default function AppInitializer() {
-  const refreshUser = useAppStore((state) => state.refreshUser)
+export default function AppInitializer({ children }: { children: React.ReactNode }) {
+  // 클라이언트 환경에서만 localStorage 체크
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('token') : null
 
-  useEffect(() => {
-    refreshUser()
-  }, [])
+  useQuery({
+    queryKey: ['user'],
+    queryFn: fetchUser,
+    enabled: !!token, // 🚩 토큰이 있을 때만 요청
+    retry: false,
+    staleTime: 1000 * 60,
+  })
 
-  return null // 이 컴포넌트는 렌더링할 UI 없음
+  return <>{children}</>
 }
